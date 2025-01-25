@@ -1,0 +1,14 @@
+services:
+    postgres:
+        image: postgres:13
+        environment:
+            POSTGGRES_USER: airfflow
+            POSTGRES_PASSWORD: airflow
+            POSTGGRES_DB: airflow
+        volumes:
+            - postgres-db-volume:/var/lib/postggresql/data
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "airflow"]
+            interval: 5s
+            retries: 5
+        restart: always

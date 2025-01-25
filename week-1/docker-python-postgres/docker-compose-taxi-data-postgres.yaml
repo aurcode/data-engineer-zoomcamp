@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ny_taxi
+    volumes:
+      - ny_taxi_postgres_data:/var/lib/postggresql/data
+    ports:
+      - 5432:5432
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin4
+    ports:
+      - "8080:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+
+volumes:
+  ny_taxi_postgres_data: {}
+
+# docker run -i -t -v .:/opt/notebooks -p 8888:8888 continuumio/anaconda3 /bin/bash -c "\
+#    conda install jupyter -y --quiet && \
+#    mkdir -p /opt/notebooks && \
+#    jupyter notebook \
+#    --notebook-dir=/opt/notebooks --ip='*' --port=8888 \
+#    --NotebookApp.token='' --no-browser --allow-root"
+
+# pgcli -h postgres -p 5432 -u -d ny_taxi
