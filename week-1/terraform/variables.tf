@@ -1,6 +1,6 @@
 variable "credentials" {
   description = "My Credentials"
-  default = "./keys/my-creds.json"
+  default     = "./keys/my-creds.json"
 }
 
 variable "project" {
@@ -10,7 +10,12 @@ variable "project" {
 
 variable "region" {
   description = "Region"
-  default     = "us-central1"
+  default     = "asia-east1"
+}
+
+variable "zone" {
+  description = "Zone"
+  default     = "asia-east1-a "
 }
 
 variable "location" {
