@@ -1,8 +1,19 @@
-### Login
+## Login
 ```
 gcloud auth activate-service-account --key-file=<key.json>
 gcloud config set project "<project-name>"
 ```
+
+## Storaged in GCP
+
+| Product           | Simple Description                                     | Good For                                                                  | Bad For                                                                         | Examples and Scale                                       |
+|--------------------|--------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------|---------------------------------------------------------|
+| Cloud Firestore    | Scalable storage for structured servers.               | Google App Engine applications                                            | Relational or analytical data.                                                  | User profiles or product catalogs. TB                   |
+| Cloud Bigtable     | Large volume, low latency database.                    | "Flat" data, heavy read/write, or analytical data.                         | Transactional or highly structured data.                                       | Ad data, financial data, or IoT data. PB               |
+| Google Cloud Storage | Binary/object storage (files).                          | Large unstructured data or data accessed infrequently.                     | Structured data, creating fast applications.                                      | Images, disk backups, and file transmissions. PB          |
+| Cloud Spanner      | Global, consistent, and innovative RDBMS.               | Serving large amounts of data and consistent data worldwide.             | Small applications and analytical data.                                         | Ad publishing, global inventory, global applications. PB  |
+| Cloud SQL          | Easy-to-understand RDBMS based on virtual machines.    | Web frameworks and existing applications.                                 | Scaling, analysis, heavy writes.                                                | User credentials, transactions. TB                    |
+| BigQuery | Fully-managed, serverless data warehouse. | Business intelligence, data analytics, and large datasets. | Real-time transactions, frequently updated data, very small datasets. | Analyzing website traffic, customer behavior, and market trends. PB |
 
 ### gsutil (Bucket from GCP)
 
@@ -68,7 +79,84 @@ cbt ls my-table
 ```
 
 ```
+cbt set my-table my-row-key my-family:my-column=my-cell
+```
 
+read table
+```
+cbt read my-table
+```
+
+### Cloud SQL & Cloud Spanner
+
+- CSQL: Serverless service close to MySQL, PostgreSQL and SQL Server
+- CSpanner: Around world (Global but more expensive)
+
+Create a instance for Spanner
+```
+gcloud spanner instances create example-db --config=regional-us-central1 --nodes=1
+```
+
+Create a db inside the instance
+```
+gcloud spanner databases create example-db-db --instance=example-db
+```
+
+Create schema | Write ddl
+```
+gcloud spanner databases ddl update example-db-db
+        --instance=example-db
+        --ddl='CREATE TABLE Singers ( 
+				SingerId INT64 NOT NULL, 
+				FirstName STRING(1024), 
+				LastName STRING(1024), 
+				SingerInfo BYTES(MAX) 
+				) PRIMARY KEY (SingerId)'
+```
+
+Insert Data
+```
+gcloud spanner rows insert 
+        --database=example-db-db
+        --instance=example-db
+        --table=Singers
+        --data=
+                SingerId=1,
+                FirstName=Marc,
+                LastName=Richards
+```
+
+Update Data
+```
+gcloud spanner rows update
+        --table=Singers
+        --database=example-db-db
+        --instance=example-db
+        --data=SingerId=1,SingerName=Will
+```
+
+Delete Data
+```
+gcloud spanner rows delete 
+        --table=Singers
+        --database=example-db-db
+        --instance=example-db
+        --keys=1
+```
+
+Read data
+```
+gcloud spanner databases execute-sql example-db-db
+    --instance=example-db
+    --sql='SELECT * FROM Singers'
+```
+
+### Cloud Firestore
+- Serverless NoSQL Database based in documents
+- btw can work without network
+
+```
+gcloud firestore databases create --region=us-east4	
 ```
 
 ### BigQuery (BQ) - SQL serverless
@@ -87,3 +175,112 @@ cbt ls my-table
   gcloud alpha bq jobs describe
   gcloud alpha bq jobs list
 ```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+
+## Compute Enine
+
+```
+
+```
+
+### VPC Network
+
+**Red in VPC:**
+
+|Kind||||
+|---|---|---|---|
+| Default | Presente en cada proyecto | Una subred por región | Reglas de firewall por defecto |
+| Auto Mode | Red por defecto | Una subred por región | Subred /20 expandible a /16 |
+| Custom Mode | No se crean subredes por defecto | Control total del rango de IPs | Subred expandible a cualquier tamaño RFC 1918 |
+
+
+**Capacidades importantes de las VPC**
+| Global | Expandible | Access Privado | Compatible |
+|---|---|---|---|
+| Conectividad multi-región privada | Adaptable a las necesidades | Cloud Storage y otras APIs | Administración de red centralizada |
+| Utiliza la red global de Google | Crece sin problemas | IPs públicas y acceso a Internet opcionales | VPN compartida. IAM granular |
+
+Create network
+```
+gcloud compute networks create <name>
+    --subnet-mode=<mode> 
+    --bgp-routing-mode=<type> 
+    --mtu=<number-mtu>
+```
+
+Create subnetwork
+```
+gcloud compute networks subnets create <name-subnet>
+    --network=<name-vpc> 
+    --range=<ip-range> 
+    --region=<region-name>
+```
+
+```
+gcloud compute firewall-rules create <rule-name> --network <network-name> --allow tcp:<port>
+
+gcloud compute firewall-rules delete <rule-name> --network <network-name>
+
+gcloud compute firewall-rules list
+```
+
+- Rules Network by Default are all trafit to internet is allow, but all trafit from internet is deny
+
+- Cloud nat for create fake public ip for our machines
+
+### Virtual machine
+
+- Preemptible VMs onna be up only 24 hours but is cheaper, perfect for haboop or similars
+
+| **Instance Type** | **Optimization Focus**     | **Description**                         |
+|-------------------|----------------------------|-----------------------------------------|
+| **Efficient E2**  | Cost optimization          | Prioritizes cost savings               |
+| **Balanced N2, N2D** | Balanced performance       | Focused on performance and TCO (Total Cost of Ownership) |
+| **TAU T2D**       | Scalability optimization   | Optimized for high scalability and performance |
+| **C2**            | Compute optimization       | Best CPU performance                   |
+| **M1, M2**        | Memory optimization        | Higher memory capacity                 |
+| **A2**            | Acceleration optimization  | Optimized for high-performance GPUs    |
+
+```
+gcloud compute ssh <nombre-vm>  --zone <zona> --tunnel-through-iap
+```
+- 35.235.240.0/20
+
+
+### idk
+
+```gcloud builds submit --tag gcr.io/project_id/webapp:0.0.1```
+
+### Kubernetes in GCP
