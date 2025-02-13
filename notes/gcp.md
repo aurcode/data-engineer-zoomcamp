@@ -2,6 +2,7 @@
 ```
 gcloud auth activate-service-account --key-file=<key.json>
 gcloud config set project "<project-name>"
+gcloud services list --enabled
 ```
 
 ## Storaged in GCP
@@ -156,10 +157,10 @@ gcloud spanner databases execute-sql example-db-db
 - btw can work without network
 
 ```
-gcloud firestore databases create --region=us-east4	
+gcloud firestore databases create --region=<region-name>	
 ```
 
-### BigQuery (BQ) - SQL serverless
+### alpha BQ (alpha BigQuery)
 
 - https://cloud.google.com/sdk/gcloud/reference/alpha/bq/datasets
 - https://cloud.google.com/bigquery/docs/locations
@@ -177,43 +178,121 @@ gcloud firestore databases create --region=us-east4
 ```
 
 ```
+gcloud alpha bq datasets list --project=<project-name> --all
 
+gcloud alpha bq datasets create <bq-dataset-name>
+        --description="<description>"
+        --overwrite
+        --project=<project-name>
+
+gcloud alpha bq datasets describe <bq-dataset-name> --project=<project-name>
+```
+
+### BigQuery (BQ) - SQL serverless
+
+Information BQ
+```
+bq ls
+
+bq ls <dataset-name>
+
+bq show <project-name>:<dataset-name>
+```
+
+Create dataset
+```
+bq mk --location=<region-name> --dataset <project-name>:<dataset-name>
+```
+
+Create table inside dataset
+```
+bq mk -t <project-name>:<dataset-name>.<table-name> <id:integer,name:string>
 ```
 
 ```
+bq query --project_id=<project-name> --use_legacy_sql=false 'SELECT table_catalog, table_schema, table_name, table_type, is_insertable_into, creation_time, ddl from <table-name>.INFORMATION_SCHEMA.TABLES;'
 
+bq query --project_id=<project-name> --use_legacy_sql=false 'SELECT * from <x>;'
+```
+Show innformation pretty way
+```
+bq show --format=pretty <project-name>:<dataset-name>.<table-name>
+
+bq show --format=prettyjson <project-name>:<dataset-name>.<table-name>
+
+bq show --format=prettyjson <project-name>:<dataset-name>
 ```
 
+Delete table
+```
+!bq rm <project-name>:<dataset-name>.<table-name>
+
+bq rm -r
 ```
 
+<details>
+<summary>Extra Commands for BQ</summary>
+
+- https://cloud.google.com/bigquery/docs/tables#sql
+- https://cloud.google.com/bigquery/docs/reference/bq-cli-reference#bq_mk
+- https://cloud.google.com/bigquery/docs/information-schema-tables
+- https://cloud.google.com/bigquery/docs/listing-datasets
+
+1. **Show datasets in a project**:
+```bash
+bq ls
 ```
 
+2. **Show tables in a dataset**:
+```bash
+bq ls dataset_id
 ```
 
+3. **Show schema of a table**:
+```bash
+bq show project_id:dataset_id.table_id
 ```
 
+4. **Load data into a table**:
+```bash
+bq load --source_format=FORMAT dataset_id.table_id path_to_source
 ```
 
+5. **Export data from a table**:
+```bash
+bq extract dataset_id.table_id gs://path_to_destination
 ```
 
+6. **Run a query**:
+```bash
+bq query --use_legacy_sql=false 'SELECT * FROM dataset_id.table_id'
 ```
 
+7. **Show query results in the console**:
+```bash
+bq query --n=5 'SELECT * FROM dataset_id.table_id'
 ```
 
+8. **Copy a table**:
+```bash
+bq cp project_id:dataset_id.table_id project_id:dataset_id.new_table_id
 ```
 
+9. **Delete a table**:
+```bash
+bq rm project_id:dataset_id.table_id
 ```
 
+10. **Delete a dataset**:
+```bash
+bq rm -r dataset_id
 ```
 
-```
+
+</details>
 
 
 ## Compute Enine
-
-```
-
-```
 
 ### VPC Network
 
@@ -274,13 +353,21 @@ gcloud compute firewall-rules list
 | **A2**            | Acceleration optimization  | Optimized for high-performance GPUs    |
 
 ```
-gcloud compute ssh <nombre-vm>  --zone <zona> --tunnel-through-iap
+gcloud compute ssh <instance-name>  --zone <zona> --tunnel-through-iap
+gcloud compute scp 
 ```
 - 35.235.240.0/20
 
+```
+gcloud compute scp <path> <instance-name>:<path> --zone=<zone>
+```
 
 ### idk
 
 ```gcloud builds submit --tag gcr.io/project_id/webapp:0.0.1```
 
-### Kubernetes in GCP
+## Kubernetes (K8s) in GCP
+
+```
+gcloud beta container --project <project-name> clusters get-credentials '<cluster-name>' --zone=<zone>
+```
